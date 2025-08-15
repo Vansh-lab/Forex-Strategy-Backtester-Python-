@@ -1,0 +1,62 @@
+import pandas as pd
+from backtester.indicators import add_sma, add_rsi
+from backtester.engine import run_backtest
+from backtester.performance import calculate_metrics
+from backtester.plotting import plot_results
+
+def main():
+    # --- Configuration ---
+    FILE_PATH = 'data/EURUSD_H1.csv'
+    INITIAL_CAPITAL = 10000.0
+    
+    # Strategy Parameters
+    SHORT_SMA = 50
+    LONG_SMA = 100
+    RSI_PERIOD = 14
+    RSI_BUY_THRESHOLD = 50
+    RSI_SELL_THRESHOLD = 50
+
+    # --- Data Loading and Preparation ---
+    try:
+        df = pd.read_csv(FILE_PATH)
+        df['datetime'] = pd.to_datetime(df['Date'] + ' ' + df['Time'])
+        df.set_index('datetime', inplace=True)
+        print("Data loaded successfully.")
+    except FileNotFoundError:
+        print(f"Error: Data file not found at {FILE_PATH}")
+        return
+
+    # --- Add Technical Indicators ---
+    df = add_sma(df, SHORT_SMA)
+    df = add_sma(df, LONG_SMA)
+    df = add_rsi(df, RSI_PERIOD)
+    
+    # Drop rows with NaN values created by indicators
+    df.dropna(inplace=True)
+    print("Technical indicators calculated.")
+
+    # --- Run Backtest ---
+    print("Running backtest...")
+    results_df, equity_curve = run_backtest(
+        df=df,
+        short_sma=SHORT_SMA,
+        long_sma=LONG_SMA,
+        rsi_buy_threshold=RSI_BUY_THRESHOLD,
+        rsi_sell_threshold=RSI_SELL_THRESHOLD,
+        initial_capital=INITIAL_CAPITAL
+    )
+    print("Backtest complete.")
+
+    # --- Calculate and Display Performance Metrics ---
+    metrics = calculate_metrics(results_df, equity_curve, INITIAL_CAPITAL)
+    print("\n--- Performance Metrics ---")
+    for key, value in metrics.items():
+        print(f"{key}: {value}")
+    print("---------------------------\n")
+
+    # --- Plot Results ---
+    plot_results(df, equity_curve, results_df, SHORT_SMA, LONG_SMA)
+
+
+if __name__ == "__main__":
+    main()
