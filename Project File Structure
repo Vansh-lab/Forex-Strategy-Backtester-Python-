@@ -1,0 +1,15 @@
+forex_backtester/
+│
+├── data/
+│   └── EURUSD_H1.csv  (You'll need to provide this data file)
+│
+├── backtester/
+│   ├── __init__.py
+│   ├── engine.py        (The core backtesting logic)
+│   ├── indicators.py    (Functions for technical indicators)
+│   └── performance.py   (Functions for calculating metrics)
+│   └── plotting.py      (Functions for visualization)
+│
+├── main.py              (The main script to run the backtest)
+├── requirements.txt
+└── README.md
